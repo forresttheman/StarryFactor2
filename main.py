@@ -56,11 +56,12 @@ def Set_Pixel_Array():
 
 
 def BlitPixels():
-    screen.fill((255, 255, 255))
-    for y in range(screen_height):
-        for x in range(screen_width):
-            if pixelsList[y][x] == 1:
-                screen.blit(pixelImg, ((x * screenStepX) + offsetX, (y * screenStepY) + offsetY))
+  print("BLIT")
+  screen.fill((255, 255, 255))
+  for y in range(screen_height):
+      for x in range(screen_width):
+          if pixelsList[y][x] == 1:
+              screen.blit(pixelImg, ((x * screenStepX) + offsetX, (y * screenStepY) + offsetY))
 
 
               
@@ -102,7 +103,7 @@ def InterpretPixels(list):
                 
 
             # does this element even exist here?
-            if (list[y][x - 1] == None):
+            if (x - 1 < 0):
                 hasNeighbor = False
                 #  nope!
             else:
@@ -120,7 +121,7 @@ def InterpretPixels(list):
               # y index - 1
 
             # does this element even exist here?
-            if (list[y - 1][x] == None):
+            if (y - 1 < 0):
                 hasNeighbor = False
                 #  nope!
             else:
@@ -128,6 +129,7 @@ def InterpretPixels(list):
                 # it does!
 
             if hasNeighbor:
+              if (list[y - 1][x] == 1):
                neighbors += 1
 
               
@@ -156,19 +158,30 @@ def InterpretPixels(list):
               
             # Toggle pixel state based on neighbors
             pixel = list[y][x]
+            if (pixel == 1):
+              aliveForOneGen = True
+            elif (pixel == 0):
+              aliveForOneGen = False
 
             # Loneliness....
-            if neighbors < neighborsToLive:
+            if neighbors < 2:
                 pixel = 0
 
             # Good amount of neighbors!
-            if neighbors >= neighborsToLive & neighbors < neighborsToDie:
+            if neighbors >= 2 & neighbors <= 3:
                 pixel = 1
-
+ 
             # Overcrowding
-            if neighbors >= neighborsToDie:
+            if neighbors > 3:
                 pixel = 0
 
+            # Pixel has been alive for a gen?
+            if (aliveForOneGen):
+              pixel = 0
+            # if its dead and has 3 neighbors, resurerect!
+            elif (neighbors == 3) & aliveForOneGen == False:
+              pixel = 1
+              
             # change pixel's value in list
             list[y][x] = pixel
 
