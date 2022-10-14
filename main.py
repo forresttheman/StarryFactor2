@@ -167,7 +167,6 @@ def InterpretPixels(list):
             if generationCounters[y][x] == 2:
               pixel = 0
               aliveTwoGen = True
-              skipToEnd = True 
               generationCounters[y][x] = 0
               
             # if the pixel is alive, 
@@ -175,29 +174,28 @@ def InterpretPixels(list):
             elif (pixel == 1):
               generationCounters[y][x] += 1
               
-            # if we haven't been alive too long
-            if (skipToEnd == False):
+            
               
-              # Loneliness....
-              if neighbors < 2:
-                  pixel = 0
-  
-              # Good amount of neighbors!
-              if neighbors >= 2 & neighbors <= 3:
-                  pixel = 1
-   
-              # Overcrowding
-              if neighbors > 3:
-                  pixel = 0
-  
-              
-              # if its dead and has 3 neighbors, resurrect!
-              if (neighbors == 3) &  pixel == 0:
-                pixel = 1
-                
-            # Pixel has been alive for a gen?
-              if (aliveTwoGen):
+            # Loneliness....
+            if neighbors < 2:
                 pixel = 0
+
+            # Good amount of neighbors!
+            elif neighbors >= 2 & neighbors <= 3:
+                pixel = 1
+ 
+            # Overcrowding
+            elif neighbors > 3:
+                pixel = 0
+
+            
+            # if its dead and has 3 neighbors, resurrect!
+            elif (neighbors == 3) &  pixel == 0:
+              pixel = 1
+              
+            # Pixel has been alive for a gen?
+            if (aliveTwoGen):
+              pixel = 0
                 
             # change pixel's value in list
             list[y][x] = pixel
