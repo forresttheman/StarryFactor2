@@ -23,14 +23,11 @@ screen = pygame.display.set_mode(
     (screen_width, screen_height))
 pygame.display.set_caption('StarryFactory')
 
-# rules for pixel interpretation
-neighborsToLive = 2
-neighborsToDie = 4
-
-
-
 # list that pixels are stored in
 pixelsList = []
+
+# list of generation counts for corresponding pixels
+generationCounters = []
 
 # pixel images
 pixelImg = pygame.image.load('1.png')
@@ -52,7 +49,10 @@ def Set_Pixel_Array():
     # list that pixels are stored in
     pixelsList = [[random.randint(0, 1) for x in  range(screen_width)]
                   for y in range(screen_height)]
-    return pixelsList
+
+    generationCounters = [[0 for x in  range(screen_width)]
+                  for y in range(screen_height)]
+    return pixelsList, generationCounters
 
 
 def BlitPixels():
@@ -156,32 +156,49 @@ def InterpretPixels(list):
             #   MANAGE PIXEL STATES   #
             ###########################
               
-            # Toggle pixel state based on neighbors
+            # Find pixel and check if it 
+              # has been alive for two gens
             pixel = list[y][x]
-            if (pixel == 1):
-              aliveForOneGen = True
-            elif (pixel == 0):
-              aliveForOneGen = False
+          
+            skipToEnd = False
+            aliveTwoGen = False
 
-            # Loneliness....
-            if neighbors < 2:
-                pixel = 0
-
-            # Good amount of neighbors!
-            if neighbors >= 2 & neighbors <= 3:
-                pixel = 1
- 
-            # Overcrowding
-            if neighbors > 3:
-                pixel = 0
-
-            # Pixel has been alive for a gen?
-            if (aliveForOneGen):
+            # if it has, kill it and skip to the end
+            if generationCounters[y][x] == 2:
               pixel = 0
-            # if its dead and has 3 neighbors, resurerect!
-            elif (neighbors == 3) & aliveForOneGen == False:
-              pixel = 1
+              aliveTwoGen = True
+              skipToEnd = True 
+              generationCounters[y][x] = 0
               
+            # if the pixel is alive, 
+              # add to generation counter 
+            elif (pixel == 1):
+              generationCounters[y][x] += 1
+              
+            # if we haven't been alive too long
+            if (skipToEnd == False):
+              
+              # Loneliness....
+              if neighbors < 2:
+                  pixel = 0
+  
+              # Good amount of neighbors!
+              if neighbors >= 2 & neighbors <= 3:
+                  pixel = 1
+   
+              # Overcrowding
+              if neighbors > 3:
+                  pixel = 0
+  
+              
+              # if its dead and has 3 neighbors, resurrect!
+              if (neighbors == 3) &  pixel == 0:
+                pixel = 1
+                
+            # Pixel has been alive for a gen?
+              if (aliveTwoGen):
+                pixel = 0
+                
             # change pixel's value in list
             list[y][x] = pixel
 
@@ -190,7 +207,7 @@ def InterpretPixels(list):
 # LOOP #
 ########
 
-pixelsList = Set_Pixel_Array()
+pixelsList, generationCounters = Set_Pixel_Array()
 
 while True:
     screen.fill((0, 0, 255))
