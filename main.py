@@ -6,8 +6,8 @@ import random
 pygame.init()
 
 #screen size variables
-screen_width = 300
-screen_height = 300
+screen_width = 80
+screen_height = 20
 
 # the amount of distance between the pixels
 screenStepX = 16
@@ -20,8 +20,8 @@ offsetY = 10
 
 # set the screen
 screen = pygame.display.set_mode(
-    (screen_width, screen_height))
-pygame.display.set_caption('StarryFactory')
+    (screen_width * 17, screen_height * 17))
+pygame.display.set_caption('Starry Factor')
 
 # list that pixels are stored in
 pixelsList = []
@@ -42,8 +42,6 @@ def Run():
     InterpretPixels(pixelsList)
     BlitPixels()
 
-def SetScreenSpacing():
-  pass
 
 def Set_Pixel_Array():
     # list that pixels are stored in
@@ -101,7 +99,6 @@ def InterpretPixels(list):
             ###########################
               # x index - 1
                 
-
             # does this element even exist here?
             if (x - 1 < 0):
                 hasNeighbor = False
@@ -138,7 +135,7 @@ def InterpretPixels(list):
             ###########################
               # y index + 1
                 
-            #does this element even exist here?
+            # does this element even exist here?
             if (y + 1 > len(list) - 1):
                 hasNeighbor = False
                 #  nope!
@@ -160,7 +157,6 @@ def InterpretPixels(list):
               # has been alive for two gens
             pixel = list[y][x]
           
-            skipToEnd = False
             aliveTwoGen = False
 
             # if it has, kill it and skip to the end
@@ -174,18 +170,16 @@ def InterpretPixels(list):
             elif (pixel == 1):
               generationCounters[y][x] += 1
               
-            
-              
             # Loneliness....
             if neighbors < 2:
                 pixel = 0
 
             # Good amount of neighbors!
-            elif neighbors >= 2 & neighbors <= 3:
+            if neighbors >= 2 & neighbors <= 3:
                 pixel = 1
  
             # Overcrowding
-            elif neighbors > 3:
+            if neighbors > 3:
                 pixel = 0
 
             
