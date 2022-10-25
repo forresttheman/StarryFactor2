@@ -5,16 +5,20 @@ import random
 
 pygame.init()
 
-#screen size variables
-screen_width = 80
+
+# diseases and plagues
+diseaseStatusList = []
+
+# screen size variables
+screen_width = 20
 screen_height = 20
 
 # the amount of distance between the pixels
 screenStepX = 16
 screenStepY = 16
 
-# the distance the entire 
-# pixel zone will be shifted
+# the distance the entire
+# pixel zone will be shifted (padding)
 offsetX = 10
 offsetY = 10
 
@@ -31,7 +35,23 @@ generationCounters = []
 
 # pixel images
 pixelImg = pygame.image.load('1.png')
+diseasedImg = pygame.image.load('diseased.png')
 
+imgList = [pixelImg, diseasedImg]
+
+###########
+# Classes #
+###########
+
+class Pixel():
+  def __init__(self, iX, iY):
+    self.iX = iX # x index (in list)
+    self.iY = iY # y index
+
+    self.genCount = 0
+    self.diseased = False
+    
+  
 ################
 # PIXELS STUFF #
 ################
@@ -59,7 +79,7 @@ def BlitPixels():
   for y in range(screen_height):
       for x in range(screen_width):
           if pixelsList[y][x] == 1:
-              screen.blit(pixelImg, ((x * screenStepX) + offsetX, (y * screenStepY) + offsetY))
+              screen.blit(random.choice(imgList), ((x * screenStepX) + offsetX, (y * screenStepY) + offsetY))
 
 
               
@@ -76,79 +96,9 @@ def InterpretPixels(list):
             # Check neighbor pixel states (1 or 0?)
             neighbors = 0
 
-            ###########################
-            #   NEIGHBOR BLOCK 1      #
-            ###########################
-              # x index +1
-
-            # does this element even exist here?
-            if (x + 1 > len(list[y]) -1):
-                hasNeighbor = False
-                #  nope!
-            else:
-                hasNeighbor = True
-                # it does!
-
-            if hasNeighbor:
-              if list[y][x + 1] == 1:
-                neighbors += 1
-
-                
-            ###########################
-            #   NEIGHBOR BLOCK 2      #
-            ###########################
-              # x index - 1
-                
-            # does this element even exist here?
-            if (x - 1 < 0):
-                hasNeighbor = False
-                #  nope!
-            else:
-                hasNeighbor = True
-                # it does!
-
-            if hasNeighbor:
-              if list[y][x - 1] == 1:
-                neighbors += 1
-
-                  
-            ###########################
-            #   NEIGHBOR BLOCK 3      #
-            ###########################    
-              # y index - 1
-
-            # does this element even exist here?
-            if (y - 1 < 0):
-                hasNeighbor = False
-                #  nope!
-            else:
-                hasNeighbor = True
-                # it does!
-
-            if hasNeighbor:
-              if (list[y - 1][x] == 1):
-               neighbors += 1
-
-              
-            ###########################
-            #   NEIGHBOR BLOCK 4      #
-            ###########################
-              # y index + 1
-                
-            # does this element even exist here?
-            if (y + 1 > len(list) - 1):
-                hasNeighbor = False
-                #  nope!
-            else:
-                hasNeighbor = True
-                # it does!
-
-            if hasNeighbor:
-              if list[y + 1][x] == 1:
-                neighbors += 1
+            CheckNeighbors(neighbors, x, y, list)
 
 
-              
             ###########################
             #   MANAGE PIXEL STATES   #
             ###########################
@@ -159,7 +109,7 @@ def InterpretPixels(list):
           
             aliveTwoGen = False
 
-            # if it has, kill it and skip to the end
+            # if it has, kill it 
             if generationCounters[y][x] == 2:
               pixel = 0
               aliveTwoGen = True
@@ -195,6 +145,79 @@ def InterpretPixels(list):
             list[y][x] = pixel
 
 
+def CheckNeighbors(neighbors, x, y, list):
+  ###########################
+  #   NEIGHBOR BLOCK 1      #
+  ###########################
+    # x index +1
+
+  # does this element even exist here?
+  if (x + 1 > len(list[y]) -1):
+      hasNeighbor = False
+      #  nope!
+  else:
+      hasNeighbor = True
+      # it does!
+
+  if hasNeighbor:
+    if list[y][x + 1] == 1:
+      neighbors += 1
+
+      
+  ###########################
+  #   NEIGHBOR BLOCK 2      #
+  ###########################
+    # x index - 1
+      
+  # does this element even exist here?
+  if (x - 1 < 0):
+      hasNeighbor = False
+      #  nope!
+  else:
+      hasNeighbor = True
+      # it does!
+
+  if hasNeighbor:
+    if list[y][x - 1] == 1:
+      neighbors += 1
+
+        
+  ###########################
+  #   NEIGHBOR BLOCK 3      #
+  ###########################    
+    # y index - 1
+
+  # does this element even exist here?
+  if (y - 1 < 0):
+      hasNeighbor = False
+      #  nope!
+  else:
+      hasNeighbor = True
+      # it does!
+
+  if hasNeighbor:
+    if (list[y - 1][x] == 1):
+     neighbors += 1
+
+    
+  ###########################
+  #   NEIGHBOR BLOCK 4      #
+  ###########################
+    # y index + 1
+      
+  # does this element even exist here?
+  if (y + 1 > len(list) - 1):
+      hasNeighbor = False
+      #  nope!
+  else:
+      hasNeighbor = True
+      # it does!
+
+  if hasNeighbor:
+    if list[y + 1][x] == 1:
+      neighbors += 1
+
+      
 ########
 # LOOP #
 ########
@@ -202,7 +225,7 @@ def InterpretPixels(list):
 pixelsList, generationCounters = Set_Pixel_Array()
 
 while True:
-    screen.fill((0, 0, 255))
+    screen.fill((211,211,211))
     # update the pixels
     Run()
 
