@@ -5,20 +5,16 @@ import random
 
 pygame.init()
 
-
-# diseases and plagues
-diseaseStatusList = []
+# time
+discreteStep = 0
 
 # screen size variables
 screen_width = 20
 screen_height = 20
 
-# the amount of distance between the pixels
 screenStepX = 16
 screenStepY = 16
 
-# the distance the entire
-# pixel zone will be shifted (padding)
 offsetX = 10
 offsetY = 10
 
@@ -27,17 +23,13 @@ screen = pygame.display.set_mode(
     (screen_width * 17, screen_height * 17))
 pygame.display.set_caption('Starry Factor')
 
-# list that pixels are stored in
+# pixels
 pixelsList = []
 
-# list of generation counts for corresponding pixels
-generationCounters = []
-
-# pixel images
 pixelImg = pygame.image.load('1.png')
 diseasedImg = pygame.image.load('diseased.png')
 
-imgList = [pixelImg, diseasedImg]
+oldAgeThresh = 10 # pixels die after this many gens
 
 ###########
 # Classes #
@@ -49,185 +41,100 @@ class Pixel():
     self.iY = iY # y index
 
     self.genCount = 0
+    self.alive = random.randint(0, 1) # random seed for each pixel
     self.diseased = False
-    
+
+    self.moveDir = random.randint(1, 4) # where will they try to move?
+
+  def Update(self):
+    if (self.genCount >= oldAgeThresh):
+      self.alive = 0
+      
+    self.genCount += 1
+
+  def MovePixel(self, x, y):
+    # normalize accessible indices for overwrite
+    indexX = 0
+    indexY = 0
+
+    if (self.moveDir == 1): # moving right
+      # if x + 1 is out of range 
+      # (all rows EXCEPT last bottom row)
+      if (x + 1 >= len(pixelsList[y]) - 1):
+        indexX = 0
+        indexY = y + 1
+
+      # Bottom Row
+      if (y == screen_height & x + 1 >= len(pixelsList[y]) - 1):
+        indexX = 0
+        indexY = 0
+        
+
+    elif (self.moveDir == 2): # moving left
+      # if x - 1 is out of range
+      # (all rows EXCEPT top row))
+      if (x - 1 < 0):
+        indexX = 0
+
+      # top row (going to the bottom last x)
+      if (y == 0 & x - 1 < 0):
+        indexX = screen_width
+        indexY = screen_height
+        
+    # finally, overwrite the proposed pixel with 
+      # the information from the current pixel
+    OverWriteDeadPixel(indexX, indexY, self.moveDir)
+
   
 ################
 # PIXELS STUFF #
 ################
 
-def Run():
-    #print updated pixels
-    time.sleep(0.01)
-    InterpretPixels(pixelsList)
-    BlitPixels()
-
-
 def Set_Pixel_Array():
     # list that pixels are stored in
-    pixelsList = [[random.randint(0, 1) for x in  range(screen_width)]
+    pixelsList = [[Pixel(x, y) for x in  range(screen_width)]
                   for y in range(screen_height)]
-
-    generationCounters = [[0 for x in  range(screen_width)]
-                  for y in range(screen_height)]
-    return pixelsList, generationCounters
+  
+    return pixelsList
 
 
-def BlitPixels():
-  print("BLIT")
-  screen.fill((255, 255, 255))
+def Pixels():
+  time.sleep(discreteStep)
+
+  # iterate through matrix
   for y in range(screen_height):
       for x in range(screen_width):
-          if pixelsList[y][x] == 1:
-              screen.blit(random.choice(imgList), ((x * screenStepX) + offsetX, (y * screenStepY) + offsetY))
-
-
-              
-########################
-# PIXEL INTERPRETATION #
-########################
-
-def InterpretPixels(list):
-    # iterate through pixels
-    time.sleep(1)
-    for y in range(screen_height):
-        for x in range(screen_width):
-          
-            # Check neighbor pixel states (1 or 0?)
-            neighbors = 0
-
-            CheckNeighbors(neighbors, x, y, list)
-
-
-            ###########################
-            #   MANAGE PIXEL STATES   #
-            ###########################
-              
-            # Find pixel and check if it 
-              # has been alive for two gens
-            pixel = list[y][x]
-          
-            aliveTwoGen = False
-
-            # if it has, kill it 
-            if generationCounters[y][x] == 2:
-              pixel = 0
-              aliveTwoGen = True
-              generationCounters[y][x] = 0
-              
-            # if the pixel is alive, 
-              # add to generation counter 
-            elif (pixel == 1):
-              generationCounters[y][x] += 1
-              
-            # Loneliness....
-            if neighbors < 2:
-                pixel = 0
-
-            # Good amount of neighbors!
-            if neighbors >= 2 & neighbors <= 3:
-                pixel = 1
- 
-            # Overcrowding
-            if neighbors > 3:
-                pixel = 0
-
-            
-            # if its dead and has 3 neighbors, resurrect!
-            elif (neighbors == 3) &  pixel == 0:
-              pixel = 1
-              
-            # Pixel has been alive for a gen?
-            if (aliveTwoGen):
-              pixel = 0
-                
-            # change pixel's value in list
-            list[y][x] = pixel
-
-
-def CheckNeighbors(neighbors, x, y, list):
-  ###########################
-  #   NEIGHBOR BLOCK 1      #
-  ###########################
-    # x index +1
-
-  # does this element even exist here?
-  if (x + 1 > len(list[y]) -1):
-      hasNeighbor = False
-      #  nope!
-  else:
-      hasNeighbor = True
-      # it does!
-
-  if hasNeighbor:
-    if list[y][x + 1] == 1:
-      neighbors += 1
-
-      
-  ###########################
-  #   NEIGHBOR BLOCK 2      #
-  ###########################
-    # x index - 1
-      
-  # does this element even exist here?
-  if (x - 1 < 0):
-      hasNeighbor = False
-      #  nope!
-  else:
-      hasNeighbor = True
-      # it does!
-
-  if hasNeighbor:
-    if list[y][x - 1] == 1:
-      neighbors += 1
-
         
-  ###########################
-  #   NEIGHBOR BLOCK 3      #
-  ###########################    
-    # y index - 1
+          # update each pixel instance
+          pixelsList[y][x].Update()
 
-  # does this element even exist here?
-  if (y - 1 < 0):
-      hasNeighbor = False
-      #  nope!
-  else:
-      hasNeighbor = True
-      # it does!
+          # move each pixel
+          pixelsList[y][x].MovePixel(x, y)
 
-  if hasNeighbor:
-    if (list[y - 1][x] == 1):
-     neighbors += 1
+          # show them on screen
+          if pixelsList[y][x].alive == 1:
+              screen.blit(pixelImg, ((x * screenStepX) + offsetX, (y * screenStepY) + offsetY))
 
-    
-  ###########################
-  #   NEIGHBOR BLOCK 4      #
-  ###########################
-    # y index + 1
-      
-  # does this element even exist here?
-  if (y + 1 > len(list) - 1):
-      hasNeighbor = False
-      #  nope!
-  else:
-      hasNeighbor = True
-      # it does!
+def OverWriteDeadPixel(x, y, MoveDir):
+  if (MoveDir == 1):
+    # transfer all information over to the right pixel
+    pixelsList[y][x + 1].genCount = pixelsList[y][x].genCount
+    pixelsList[y][x + 1].alive = 1
+    pixelsList[y][x + 1].diseased = pixelsList[y][x].diseased
+    pixelsList[y][x + 1].moveDir = random.randint(1, 4)
 
-  if hasNeighbor:
-    if list[y + 1][x] == 1:
-      neighbors += 1
+  pixelsList[y][x].alive = 0 # kill original pixel
 
-      
+  
 ########
 # LOOP #
 ########
 
-pixelsList, generationCounters = Set_Pixel_Array()
+pixelsList = Set_Pixel_Array()
 
 while True:
     screen.fill((211,211,211))
-    # update the pixels
-    Run()
+    Pixels()
 
     # closing the window?
     for event in pygame.event.get():
