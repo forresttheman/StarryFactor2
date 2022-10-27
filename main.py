@@ -6,7 +6,7 @@ import random
 pygame.init()
 
 # time
-discreteStep = 0
+discreteStep = 1
 
 # screen size variables
 screen_width = 20
@@ -56,7 +56,7 @@ class Pixel():
     # normalize accessible indices for overwrite
     indexX = 0
     indexY = 0
-
+  
     if (self.moveDir == 1): # moving right
       # if x + 1 is out of range 
       # (all rows EXCEPT last bottom row)
@@ -119,10 +119,31 @@ def OverWriteDeadPixel(x, y, MoveDir):
   if (MoveDir == 1):
     # transfer all information over to the right pixel
     pixelsList[y][x + 1].genCount = pixelsList[y][x].genCount
-    pixelsList[y][x + 1].alive = 1
     pixelsList[y][x + 1].diseased = pixelsList[y][x].diseased
     pixelsList[y][x + 1].moveDir = random.randint(1, 4)
+    pixelsList[y][x + 1].alive = 1
 
+  if (MoveDir == 2):
+    # transfer all information over to the left pixel
+    pixelsList[y][x - 1].genCount = pixelsList[y][x].genCount
+    pixelsList[y][x - 1].diseased = pixelsList[y][x].diseased
+    pixelsList[y][x - 1].moveDir = random.randint(1, 4)
+    pixelsList[y][x - 1].alive = 1
+
+  if (MoveDir == 3):
+    # transfer all information over to the right pixel
+    pixelsList[y - 1][x].genCount = pixelsList[y][x].genCount
+    pixelsList[y - 1][x].diseased = pixelsList[y][x].diseased
+    pixelsList[y - 1][x].moveDir = random.randint(1, 4)
+    pixelsList[y - 1][x].alive = 1
+  
+  if (MoveDir == 4):
+    # transfer all information over to the right pixel
+    pixelsList[y + 1][x].genCount = pixelsList[y][x].genCount
+    pixelsList[y + 1][x].diseased = pixelsList[y][x].diseased
+    pixelsList[y + 1][x].moveDir = random.randint(1, 4)
+    pixelsList[y + 1][x].alive = 1
+    
   pixelsList[y][x].alive = 0 # kill original pixel
 
   
