@@ -6,7 +6,7 @@ import random
 pygame.init()
 
 # time
-discreteStep = 1
+discreteStep = .8
 
 # screen size variables
 screen_width = 20
@@ -32,10 +32,15 @@ pygame.display.set_caption('Starry Factor')
 # pixels
 pixelsList = []
 
-pixelImg = pygame.image.load('1.png')
-diseasedImg = pygame.image.load('diseased.png')
+baseImg = pygame.image.load('img/1.png')
+greenImg = pygame.image.load('img/green.png')
+blueImg = pygame.image.load('img/blue.png')
+purpleImg = pygame.image.load('img/purple.png')
+yellowImg = pygame.image.load('img/yellow.png')
+redImg = pygame.image.load('img/red.png')
 
-oldAgeThresh = 10 # pixels die after this many gens
+
+oldAgeThresh = 60 # pixels die after this many gens
 
 ###########
 # Classes #
@@ -59,8 +64,8 @@ class Pixel():
       
     self.genCount += 1
 
-    if (random.randint(0, 100) == 0):
-      self.genCount = 0
+    if (random.randint(0, 150) == 0): # 1 in 151 chance
+      self.genCount -= random.randint(0, 5) # to lower gen count
 
   def CalcMoveAmounts(self, x, y):
     self.dX = random.choice(stepListX)
@@ -72,6 +77,27 @@ class Pixel():
 # PIXELS STUFF #
 ################
 
+def ChooseImageBasedOnGen(gen):
+
+  if gen > 10 & gen < 15:
+    imgLocal = greenImg
+
+  if gen >= 15 & gen < 20:
+    imgLocal = blueImg
+
+  if gen >= 20 & gen < 30:
+    imgLocal = purpleImg
+
+  if gen >= 30 & gen < 40:
+    imgLocal = yellowImg
+
+  if gen >= 40:
+    imgLocal = redImg
+
+  else:
+    imgLocal = baseImg
+    
+  return imgLocal
 
 def Set_Pixel_Array():
     # list that pixels are stored in
@@ -104,6 +130,8 @@ def Pixels():
            # if we are moving off screen (up)
           if (y * screenStepY + localDY <= 0):
             localDY = 0
+
+          # if we are hitting another pixel
             
                           #####
               ############# X #############
@@ -116,17 +144,18 @@ def Pixels():
           if (x * screenStepX + localDX <= 0):
             localDX = 0
 
+          # if we are hitting another pixel
+
                         ########
               ########### BLIT #############
                         ########   
             
           # select image based on generation
-            
+          pixelsList[y][x].image = ChooseImageBasedOnGen(pixelsList[y][x].genCount)
+        
           # show them on screen
           if pixelsList[y][x].alive == 1:
-              screen.blit(pixelImg, (((x * screenStepX) + offsetX) + localDX, ((y * screenStepY) + offsetY) + localDY))
-            
-  print("LOOPED")
+              screen.blit(pixelsList[y][x].image, (((x * screenStepX) + offsetX) + localDX, ((y * screenStepY) + offsetY) + localDY))
 
   
 ########
@@ -146,3 +175,5 @@ while True:
             sys.exit()
 
     pygame.display.update()
+    print("LOOP")
+
