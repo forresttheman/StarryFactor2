@@ -52,69 +52,16 @@ class Pixel():
       
     self.genCount += 1
 
-  def MovePixel(self, x, y):
-    # normalize accessible indices for overwrite
-    indexX = 0
-    indexY = 0
-  
-    if (self.moveDir == 1): # moving right
-      # if x + 1 is out of range 
-      # (all rows EXCEPT last bottom row)
-      if (x + 1 >= len(pixelsList[y]) - 1):
-        indexX = 0
-        indexY = y + 1
-
-      # Bottom Row
-      if (y == screen_height & x + 1 >= len(pixelsList[y]) - 1):
-        indexX = 0
-        indexY = 0
-        
-
-    elif (self.moveDir == 2): # moving left
-      # if x - 1 is out of range
-      # (all rows EXCEPT top row))
-      if (x - 1 < 0):
-        indexX = 0
-
-      # top row (going to the bottom last x)
-      if (y == 0 & x - 1 < 0):
-        indexX = screen_width
-        indexY = screen_height
-        
+  def MovePixel(self, x, y):/
     # finally, overwrite the proposed pixel with 
       # the information from the current pixel
-    OverWriteDeadPixel(indexX, indexY, self.moveDir)
+    OverWriteDeadPixel(x, y, self.moveDir)
 
   
 ################
 # PIXELS STUFF #
 ################
-
-def Set_Pixel_Array():
-    # list that pixels are stored in
-    pixelsList = [[Pixel(x, y) for x in  range(screen_width)]
-                  for y in range(screen_height)]
-  
-    return pixelsList
-
-
-def Pixels():
-  time.sleep(discreteStep)
-
-  # iterate through matrix
-  for y in range(screen_height):
-      for x in range(screen_width):
-        
-          # update each pixel instance
-          pixelsList[y][x].Update()
-
-          # move each pixel
-          pixelsList[y][x].MovePixel(x, y)
-
-          # show them on screen
-          if pixelsList[y][x].alive == 1:
-              screen.blit(pixelImg, ((x * screenStepX) + offsetX, (y * screenStepY) + offsetY))
-
+    
 def OverWriteDeadPixel(x, y, MoveDir):
   if (MoveDir == 1):
     # transfer all information over to the right pixel
@@ -145,6 +92,32 @@ def OverWriteDeadPixel(x, y, MoveDir):
     pixelsList[y + 1][x].alive = 1
     
   pixelsList[y][x].alive = 0 # kill original pixel
+
+
+def Set_Pixel_Array():
+    # list that pixels are stored in
+    pixelsList = [[Pixel(x, y) for x in  range(screen_width)]
+                  for y in range(screen_height)]
+  
+    return pixelsList
+
+
+def Pixels():
+  time.sleep(discreteStep)
+
+  # iterate through matrix
+  for y in range(screen_height):
+      for x in range(screen_width):
+        
+          # update each pixel instance
+          pixelsList[y][x].Update()
+
+          # move each pixel
+          pixelsList[y][x].MovePixel(x, y)
+
+          # show them on screen
+          if pixelsList[y][x].alive == 1:
+              screen.blit(pixelImg, ((x * screenStepX) + offsetX, (y * screenStepY) + offsetY))
 
   
 ########
