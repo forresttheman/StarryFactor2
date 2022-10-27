@@ -15,6 +15,10 @@ screen_height = 20
 screenStepX = 16
 screenStepY = 16
 
+# for random movement
+stepListX = [screenStepX, -screenStepX]
+stepListY = [screenStepY, -screenStepY]
+
 offsetX = 10
 offsetY = 10
 
@@ -45,6 +49,8 @@ class Pixel():
     self.diseased = False
 
     self.moveDir = random.randint(1, 4) # where will they try to move?
+    self.dY = 0
+    self.dX = 0
 
   def Update(self):
     if (self.genCount >= oldAgeThresh):
@@ -52,46 +58,18 @@ class Pixel():
       
     self.genCount += 1
 
-  def MovePixel(self, x, y):/
-    # finally, overwrite the proposed pixel with 
-      # the information from the current pixel
-    OverWriteDeadPixel(x, y, self.moveDir)
+    if (random.randint(0, 100) == 0):
+      self.genCount = 0
 
-  
+  def CalcMoveAmounts(self, x, y):
+    self.dX = random.choice(stepListX)
+    self.dY = random.choice(stepListY)
+    
+    return self.dX, self.dY
+
 ################
 # PIXELS STUFF #
 ################
-    
-def OverWriteDeadPixel(x, y, MoveDir):
-  if (MoveDir == 1):
-    # transfer all information over to the right pixel
-    pixelsList[y][x + 1].genCount = pixelsList[y][x].genCount
-    pixelsList[y][x + 1].diseased = pixelsList[y][x].diseased
-    pixelsList[y][x + 1].moveDir = random.randint(1, 4)
-    pixelsList[y][x + 1].alive = 1
-
-  if (MoveDir == 2):
-    # transfer all information over to the left pixel
-    pixelsList[y][x - 1].genCount = pixelsList[y][x].genCount
-    pixelsList[y][x - 1].diseased = pixelsList[y][x].diseased
-    pixelsList[y][x - 1].moveDir = random.randint(1, 4)
-    pixelsList[y][x - 1].alive = 1
-
-  if (MoveDir == 3):
-    # transfer all information over to the right pixel
-    pixelsList[y - 1][x].genCount = pixelsList[y][x].genCount
-    pixelsList[y - 1][x].diseased = pixelsList[y][x].diseased
-    pixelsList[y - 1][x].moveDir = random.randint(1, 4)
-    pixelsList[y - 1][x].alive = 1
-  
-  if (MoveDir == 4):
-    # transfer all information over to the right pixel
-    pixelsList[y + 1][x].genCount = pixelsList[y][x].genCount
-    pixelsList[y + 1][x].diseased = pixelsList[y][x].diseased
-    pixelsList[y + 1][x].moveDir = random.randint(1, 4)
-    pixelsList[y + 1][x].alive = 1
-    
-  pixelsList[y][x].alive = 0 # kill original pixel
 
 
 def Set_Pixel_Array():
@@ -112,12 +90,42 @@ def Pixels():
           # update each pixel instance
           pixelsList[y][x].Update()
 
-          # move each pixel
-          pixelsList[y][x].MovePixel(x, y)
+          # calculate the movement of each pixel
+          localDX, localDY = pixelsList[y][x].CalcMoveAmounts(x, y)
 
+                          #####
+              ############# Y #############
+                          #####
+          # if we are moving off screen (down)
+          if (y * screenStepY + localDY >= screen_height):
+            localDY = 0
+
+           # if we are moving off screen (up)
+          if (y * screenStepY + localDY <= 0):
+            localDY = 0
+            
+                          #####
+              ############# X #############
+                          #####
+          # if we are moving off screen (right)
+          if (y * screenStepX + localDX >= screen_width):
+            localDX = 0
+
+           # if we are moving off screen (left)
+          if (x * screenStepX + localDX <= 0):
+            localDX = 0
+
+                        ########
+              ########### BLIT #############
+                        ########   
+            
+          # select image based on generation
+            
           # show them on screen
           if pixelsList[y][x].alive == 1:
-              screen.blit(pixelImg, ((x * screenStepX) + offsetX, (y * screenStepY) + offsetY))
+              screen.blit(pixelImg, (((x * screenStepX) + offsetX) + localDX, ((y * screenStepY) + offsetY) + localDY))
+            
+  print("LOOPED")
 
   
 ########
