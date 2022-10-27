@@ -15,6 +15,8 @@ screen_height = 20
 screenStepX = 16
 screenStepY = 16
 
+sFactor = 17
+
 # for random movement
 stepListX = [screenStepX, -screenStepX]
 stepListY = [screenStepY, -screenStepY]
@@ -24,7 +26,7 @@ offsetY = 10
 
 # set the screen
 screen = pygame.display.set_mode(
-    (screen_width * 17, screen_height * 17))
+    (screen_width * (sFactor + 1), screen_height * (sFactor + 1)))
 pygame.display.set_caption('Starry Factor')
 
 # pixels
@@ -48,7 +50,6 @@ class Pixel():
     self.alive = random.randint(0, 1) # random seed for each pixel
     self.diseased = False
 
-    self.moveDir = random.randint(1, 4) # where will they try to move?
     self.dY = 0
     self.dX = 0
 
@@ -97,7 +98,7 @@ def Pixels():
               ############# Y #############
                           #####
           # if we are moving off screen (down)
-          if (y * screenStepY + localDY >= screen_height):
+          if (y * screenStepY + localDY >= screen_height * sFactor):
             localDY = 0
 
            # if we are moving off screen (up)
@@ -108,7 +109,7 @@ def Pixels():
               ############# X #############
                           #####
           # if we are moving off screen (right)
-          if (y * screenStepX + localDX >= screen_width):
+          if (y * screenStepX + localDX >= screen_width * sFactor):
             localDX = 0
 
            # if we are moving off screen (left)
