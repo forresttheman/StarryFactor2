@@ -5,9 +5,11 @@ import random
 import button
 
 pygame.init()
+pygame.display.set_caption("Life In Turmoil")
 
 # colors
 BLACK = (0, 0, 0)
+RED = (150, 0, 0)
 
 ###############
 # SCREEN SIZE #
@@ -31,8 +33,9 @@ realScreenHeight = screen_height * (sFactor + 1)
 playing = False
 options = False
 
-athena = pygame.font.Font("AthenaRustic.ttf", 32)
-menuText = athena.render("LIFE IN TURMOIL", True, BLACK)
+athena1 = pygame.font.Font("AthenaRustic.ttf", 32)
+genDisplayFont = pygame.font.Font("AthenaRustic.ttf", 21)
+menuText = athena1.render("LIFE IN TURMOIL", True, BLACK)
 
 # text position (title)
 titleX = realScreenWidth // 2
@@ -60,6 +63,9 @@ decorIMG1 = pygame.image.load("img/decor/decor1.png")
 # PIXELS #
 ##########
 
+#text display
+textOffset = -12
+
 # time
 discreteStep = .8
 
@@ -77,7 +83,6 @@ screen = pygame.display.set_mode((realScreenWidth, realScreenHeight))
 pixelsList = []
 
 baseImg = pygame.image.load('img/pixel/1.png')
-greenImg = pygame.image.load('img/pixel/green.png')
 redImg = pygame.image.load('img/pixel/red.png')
 
 oldAgeThresh = 60  # pixels die after this many gens
@@ -95,6 +100,8 @@ class Pixel():
         self.iY = iY  # y index
 
         self.genCount = 0
+        self.genDisplay = genDisplayFont.render(str(self.genCount), True, RED)
+      
         self.alive = random.randint(0, 1)  # random seed for each pixel
         self.diseased = False
 
@@ -110,6 +117,9 @@ class Pixel():
         if (random.randint(0, 150) == 0):  # 1 in 151 chance
             self.genCount -= random.randint(0, 5)  # to lower gen count
 
+        # update display number to match gen
+        self.genDisplay = athena1.render(str(self.genCount), True, BLACK)
+
     def CalcMoveAmounts(self, x, y):
         self.dX = random.choice(stepListX)
         self.dY = random.choice(stepListY)
@@ -120,21 +130,6 @@ class Pixel():
 ################
 # PIXELS STUFF #
 ################
-
-
-def ChooseImageBasedOnGen(gen):
-
-    if gen > 10 & gen < 20:
-        imgLocal = greenImg
-
-    if gen >= 20:
-        imgLocal = redImg
-
-    else:
-        imgLocal = baseImg
-
-    return imgLocal
-
 
 def Set_Pixel_Array():
     # list that pixels are stored in
@@ -184,32 +179,28 @@ def Pixels():
             # if we are hitting another pixel
 
             ########
-            ########### BLIT #############
+            # BLIT #
             ########
-
-            # select image based on generation
-            pixelsList[y][x].image = ChooseImageBasedOnGen(
-                pixelsList[y][x].genCount)
 
             # show them on screen
             if pixelsList[y][x].alive == 1:
-                screen.blit(pixelsList[y][x].image,
+                screen.blit(baseImg,
                             (((x * screenStepX) + offsetX) + localDX,
                              ((y * screenStepY) + offsetY) + localDY))
+                screen.blit(pixelsList[y][x].genDisplay, (((x * screenStepX) + offsetX) + localDX,
+                             ((y * screenStepY) + offsetY) + localDY - textOffset))
 
 
 ##################
 # MENU FUNCTIONS #
 ##################
 
-
 def BlitMenuObjects():
     screen.fill((211, 0, 128))
 
     # decor
     screen.blit(decorIMG1, (-titleX + 0.7 * titleX, titleY * 1.6))
-    imgTemp = pygame.transform.rotate(decorIMG1, 210)
-    screen.blit(imgTemp, (titleX // 2 + 0.18 * titleX, -80))
+    screen.blit(rotatedDecorIMG1, (titleX // 2 + 0.18 * titleX, -80))
 
     # text objects
     screen.blit(menuText, menuTextRect)
@@ -222,6 +213,9 @@ def BlitOptionsObjects():
 ########
 # LOOP #
 ########
+
+# Transform images as needed
+rotatedDecorIMG1 = pygame.transform.rotate(decorIMG1, 210)
 
 pixelsList = Set_Pixel_Array()
 
