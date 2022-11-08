@@ -66,7 +66,7 @@ decorIMG1 = pygame.image.load("img/decor/decor1.png")
 # OPTIONS MENU #
 ################
 
-showGenCounts = False
+showGenCounts = True
 showPopulation = False
 
 # buttons - images
@@ -211,7 +211,7 @@ def Pixels():
                              ((y * screenStepY) + offsetY) + localDY))
                 if (showGenCounts):
                   screen.blit(pixelsList[y][x].genDisplay, (((x * screenStepX) + offsetX) + localDX,
-                             ((y * screenStepY) + offsetY) + localDY - textOffset))
+                             ((y * screenStepY) + offsetY) + localDY + textOffset))
 
 
 ##################
