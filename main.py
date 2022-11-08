@@ -11,6 +11,10 @@ pygame.display.set_caption("Life In Turmoil")
 BLACK = (0, 0, 0)
 RED = (150, 0, 0)
 
+# fonts
+athena1 = pygame.font.Font("AthenaRustic.ttf", 32)
+genDisplayFont = pygame.font.Font("AthenaRustic.ttf", 18)
+
 ###############
 # SCREEN SIZE #
 ###############
@@ -33,8 +37,7 @@ realScreenHeight = screen_height * (sFactor + 1)
 playing = False
 options = False
 
-athena1 = pygame.font.Font("AthenaRustic.ttf", 32)
-genDisplayFont = pygame.font.Font("AthenaRustic.ttf", 21)
+# text
 menuText = athena1.render("LIFE IN TURMOIL", True, BLACK)
 
 # text position (title)
@@ -58,6 +61,25 @@ optionsBTN = button.Button(titleX // 2 + sFactor // 3, titleY * 2.3,
 
 # decorations - images
 decorIMG1 = pygame.image.load("img/decor/decor1.png")
+
+################
+# OPTIONS MENU #
+################
+
+showGenCounts = False
+showPopulation = False
+
+# buttons - images
+genOnImg = pygame.image.load("img/button/genCountOn.png")
+genOffImg = pygame.image.load("img/button/genCountOff.png")
+
+popOnImg = pygame.image.load("img/button/popCountOn.png")
+popOffImg = pygame.image.load("img/button/popCountOff.png")
+
+# buttons - definitions
+startBTN2 = button.Button(titleX * 1.4, titleY * 3.4, startButtonImg,
+                         buttonScale*0.6)
+showGenCountsBTN = button.Button(titleX // 3, titleY * 1.5, genOffImg, buttonScale * 8)
 
 ##########
 # PIXELS #
@@ -92,7 +114,6 @@ oldAgeThresh = 60  # pixels die after this many gens
 # Classes #
 ###########
 
-
 class Pixel():
 
     def __init__(self, iX, iY):
@@ -118,7 +139,8 @@ class Pixel():
             self.genCount -= random.randint(0, 5)  # to lower gen count
 
         # update display number to match gen
-        self.genDisplay = athena1.render(str(self.genCount), True, BLACK)
+        if (showGenCounts):
+          self.genDisplay = genDisplayFont.render(str(self.genCount), True, RED)
 
     def CalcMoveAmounts(self, x, y):
         self.dX = random.choice(stepListX)
@@ -187,7 +209,8 @@ def Pixels():
                 screen.blit(baseImg,
                             (((x * screenStepX) + offsetX) + localDX,
                              ((y * screenStepY) + offsetY) + localDY))
-                screen.blit(pixelsList[y][x].genDisplay, (((x * screenStepX) + offsetX) + localDX,
+                if (showGenCounts):
+                  screen.blit(pixelsList[y][x].genDisplay, (((x * screenStepX) + offsetX) + localDX,
                              ((y * screenStepY) + offsetY) + localDY - textOffset))
 
 
@@ -207,7 +230,7 @@ def BlitMenuObjects():
 
 
 def BlitOptionsObjects():
-    screen.fill((0, 0, 255))
+    screen.fill((180, 100, 15))
 
 
 ########
@@ -220,19 +243,28 @@ rotatedDecorIMG1 = pygame.transform.rotate(decorIMG1, 210)
 pixelsList = Set_Pixel_Array()
 
 while True:
-    if (playing == False & options == False):
+    if (playing == False):
+      if ( options == False):
         # main menu stuff + options
         BlitMenuObjects()
         playing = startBTN.draw(screen, "startBTN")
         options = optionsBTN.draw(screen, "optionsBTN")
 
     if (playing):
+        options = False
         screen.fill((211, 211, 211))
         Pixels()
 
     if (options):
         BlitOptionsObjects()
-        playing = startBTN.draw(screen, "startBTN")
+        showGenCounts = showGenCountsBTN.draw(screen, "genCountBTN")
+        playing = startBTN2.draw(screen, "startBTN")
+      
+        # update clicked button imgs
+        if (showGenCounts):
+          showGenCountsBTN.update_img(genOnImg)
+        if (showGenCounts == False):
+          showGenCountsBTN.update_img(genOffImg)
 
     # closing the window?
     for event in pygame.event.get():
