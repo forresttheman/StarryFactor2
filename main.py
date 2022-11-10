@@ -66,8 +66,14 @@ decorIMG1 = pygame.image.load("img/decor/decor1.png")
 # OPTIONS MENU #
 ################
 
-showGenCounts = True
+showGenCounts = False
 showPopulation = False
+
+# text
+optionsText = athena1.render("OPTIONS OPTIONS OPTIONS OPTIONS", True, RED)
+
+optionsTextRect = optionsText.get_rect()
+optionsTextRect.center = (titleX, titleY * 2)
 
 # buttons - images
 genOnImg = pygame.image.load("img/button/genCountOn.png")
@@ -79,7 +85,8 @@ popOffImg = pygame.image.load("img/button/popCountOff.png")
 # buttons - definitions
 startBTN2 = button.Button(titleX * 1.4, titleY * 3.4, startButtonImg,
                          buttonScale*0.6)
-showGenCountsBTN = button.Button(titleX // 3, titleY * 1.5, genOffImg, buttonScale * 8)
+showGenCountsBTN = button.Button(titleX // 3, titleY *0.8, genOffImg, buttonScale * 8)
+showPopCountsBTN = button.Button(titleX // 3, titleY * 2.5, popOffImg, buttonScale * 8)
 
 ##########
 # PIXELS #
@@ -232,6 +239,9 @@ def BlitMenuObjects():
 def BlitOptionsObjects():
     screen.fill((180, 100, 15))
 
+    # text objects
+    screen.blit(optionsText, optionsTextRect)
+
 
 ########
 # LOOP #
@@ -244,7 +254,7 @@ pixelsList = Set_Pixel_Array()
 
 while True:
     if (playing == False):
-      if ( options == False):
+      if (options == False):
         # main menu stuff + options
         BlitMenuObjects()
         playing = startBTN.draw(screen, "startBTN")
@@ -257,14 +267,26 @@ while True:
 
     if (options):
         BlitOptionsObjects()
-        showGenCounts = showGenCountsBTN.draw(screen, "genCountBTN")
+        
+        if (showGenCountsBTN.draw(screen, "genCountBTN")):
+            showGenCounts = not showGenCounts
+            # update clicked button imgs
+            if (showGenCounts):
+                showGenCountsBTN.update_img(genOnImg)
+            if (not showGenCounts):
+                showGenCountsBTN.update_img(genOffImg)
+
+        if (showPopCountsBTN.draw(screen, "popCountBTN")):
+            showPopulation = not showPopulation
+
+            if (showPopulation):
+                showPopCountsBTN.update_img(popOnImg)
+            if (not showPopulation):
+                showPopCountsBTN.update_img(popOffImg)
+
         playing = startBTN2.draw(screen, "startBTN")
       
-        # update clicked button imgs
-        if (showGenCounts):
-          showGenCountsBTN.update_img(genOnImg)
-        if (showGenCounts == False):
-          showGenCountsBTN.update_img(genOffImg)
+        
 
     # closing the window?
     for event in pygame.event.get():

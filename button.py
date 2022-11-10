@@ -16,9 +16,11 @@ class Button():
         self.clicked = False
 
     def update_img(self, img):
+      # take a new image and transform it
       width = img.get_width()
       height = img.get_height()
       
+      # set new image as button's image
       self.image = pygame.transform.scale(
             img, (int(width * self.scale), int(height * self.scale)))
 
@@ -41,8 +43,8 @@ class Button():
         surface.blit(self.image, (self.rect.x, self.rect.y))
 
         # debugging inputs
-        #if (action == True):
-          #print(str(action) + " " + identity)
+        if (action == True):
+          print(str(action) + " " + identity)
 
           
         return action
