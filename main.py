@@ -28,7 +28,7 @@ screenStepY = 16
 sFactor = 17
 
 realScreenWidth = screen_width * (sFactor + 1)
-realScreenHeight = screen_height * (sFactor + 1)
+realScreenHeight = screen_height * (sFactor + 2)
 
 #############
 # MAIN MENU #
@@ -66,6 +66,8 @@ decorIMG1 = pygame.image.load("img/decor/decor1.png")
 # OPTIONS MENU #
 ################
 
+options = False
+
 showGenCounts = False
 showPopulation = False
 
@@ -87,6 +89,15 @@ startBTN2 = button.Button(titleX * 1.4, titleY * 3.4, startButtonImg,
                          buttonScale*0.6)
 showGenCountsBTN = button.Button(titleX // 3, titleY *0.8, genOffImg, buttonScale * 8)
 showPopCountsBTN = button.Button(titleX // 3, titleY * 2.5, popOffImg, buttonScale * 8)
+
+########
+# GAME #
+########
+
+popText = athena1.render("Population Count:", True, BLACK)
+
+popTextRect = popText.get_rect()
+popTextRect.center = (titleX, titleY * 4)
 
 ##########
 # PIXELS #
@@ -116,6 +127,7 @@ redImg = pygame.image.load('img/pixel/red.png')
 
 oldAgeThresh = 60  # pixels die after this many gens
 
+populationCount = 0
 
 ###########
 # Classes #
@@ -170,6 +182,7 @@ def Set_Pixel_Array():
 
 def Pixels():
     time.sleep(discreteStep)
+    populationCount = 0
 
     # iterate through matrix
     for y in range(screen_height):
@@ -192,8 +205,6 @@ def Pixels():
             if (y * screenStepY + localDY <= 0):
                 localDY = 0
 
-            # if we are hitting another pixel
-
             #####
             ############# X #############
             #####
@@ -205,7 +216,9 @@ def Pixels():
             if (x * screenStepX + localDX <= 0):
                 localDX = 0
 
-            # if we are hitting another pixel
+            # IF SHOWING POP COUNT #
+            if (pixelsList[y][x].alive):
+                populationCount += 1
 
             ########
             # BLIT #
@@ -219,7 +232,6 @@ def Pixels():
                 if (showGenCounts):
                   screen.blit(pixelsList[y][x].genDisplay, (((x * screenStepX) + offsetX) + localDX,
                              ((y * screenStepY) + offsetY) + localDY + textOffset))
-
 
 ##################
 # MENU FUNCTIONS #
@@ -242,6 +254,21 @@ def BlitOptionsObjects():
     # text objects
     screen.blit(optionsText, optionsTextRect)
 
+def PlayGame():
+    screen.fill((211, 211, 211))
+
+    # update all pixels
+    Pixels()
+
+    # text and counters
+    if (showPopulation):
+        screen.blit(popText, popTextRect)
+
+        popNumText = athena1.render(str(populationCount), True, RED)
+        popNumTextRect = popNumText.get_rect()
+        popNumTextRect.center = (titleX * 1.1, titleY * 3.1)
+
+        screen.blit(popNumText, popNumTextRect)
 
 ########
 # LOOP #
@@ -262,8 +289,7 @@ while True:
 
     if (playing):
         options = False
-        screen.fill((211, 211, 211))
-        Pixels()
+        PlayGame()
 
     if (options):
         BlitOptionsObjects()
