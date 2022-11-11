@@ -10,7 +10,7 @@ pygame.init()
 pygame.display.set_caption("Life In Turmoil")
 
 # music - audio files
-menuMusic = mixer.music.load("audio/MenuMusic.mp3")
+
 optionsMusic = mixer.music.load("audio/OptionsMusic.mp3")
 gameMusic = mixer.music.load("audio/GameMusic.mp3")
 
@@ -127,6 +127,8 @@ popText = athena1.render("Population Count:", True, BLACK)
 
 popTextRect = popText.get_rect()
 popTextRect.center = (titleX * 0.9, titleY * 3.8)
+
+gameMusicCounter = 0
 
 
 ##########
@@ -308,10 +310,14 @@ def BlitOptionsObjects():
 def PlayGame():
     screen.fill((211, 211, 211))
 
+    global gameMusicCounter
+    
     # music
-    optionsMusic.stop()
-    menuMusic.stop()
-    gameMusic.play()
+    if (gameMusicCounter == 0):
+        mixer.music.load("audio/GameMusic.mp3")
+        mixer.music.play(-1, 0, 150)
+
+    gameMusicCounter += 1
 
     # update all pixels
     Pixels()
@@ -337,21 +343,21 @@ rotatedDecorIMG1 = pygame.transform.rotate(decorIMG1, 210)
 
 pixelsList = Set_Pixel_Array()
 
+# music - main menu
+mixer.music.load("audio/MenuMusic.mp3")
+mixer.music.play(-1, 0, 150)
+
 while True:
     # MAIN MENU
     if (playing == False):
       if (options == False):
-        # music
-        optionsMusic.stop()
-        menuMusic.play()
+            # main menu stuff
+            BlitMenuObjects()
 
-        # main menu stuff
-        BlitMenuObjects()
-
-        # buttons
-        playing = startBTN.draw(screen, "startBTN")
-        options = optionsBTN.draw(screen, "optionsBTN")
-        about = aboutBTN.draw(screen, "aboutBTN")
+            # buttons
+            playing = startBTN.draw(screen, "startBTN")
+            options = optionsBTN.draw(screen, "optionsBTN")
+            about = aboutBTN.draw(screen, "aboutBTN")
 
     # GAME
     if (playing):
@@ -364,10 +370,6 @@ while True:
 
     # OPTIONS MENU
     if (options):
-        # music
-        menuMusic.stop()
-        optionsMusic.play()
-
         # objects
         BlitOptionsObjects()
         
@@ -395,7 +397,6 @@ while True:
     if (about):
         pass
       
-        
 
     # closing the window?
     for event in pygame.event.get():
