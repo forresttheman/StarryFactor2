@@ -3,9 +3,19 @@ from pygame.locals import QUIT
 import time
 import random
 import button
+from pygame import mixer
 
+mixer.init()
 pygame.init()
 pygame.display.set_caption("Life In Turmoil")
+
+# music - audio files
+menuMusic = mixer.music.load("audio/MenuMusic.mp3")
+optionsMusic = mixer.music.load("audio/OptionsMusic.mp3")
+gameMusic = mixer.music.load("audio/GameMusic.mp3")
+
+# audio settings (adjust in options as well)
+mixer.music.set_volume(0.2)
 
 # colors
 BLACK = (0, 0, 0)
@@ -298,6 +308,11 @@ def BlitOptionsObjects():
 def PlayGame():
     screen.fill((211, 211, 211))
 
+    # music
+    optionsMusic.stop()
+    menuMusic.stop()
+    gameMusic.play()
+
     # update all pixels
     Pixels()
 
@@ -326,8 +341,14 @@ while True:
     # MAIN MENU
     if (playing == False):
       if (options == False):
-        # main menu stuff + options
+        # music
+        optionsMusic.stop()
+        menuMusic.play()
+
+        # main menu stuff
         BlitMenuObjects()
+
+        # buttons
         playing = startBTN.draw(screen, "startBTN")
         options = optionsBTN.draw(screen, "optionsBTN")
         about = aboutBTN.draw(screen, "aboutBTN")
@@ -338,12 +359,19 @@ while True:
         # other menus (options...)
         options = False
         about = False
+
         PlayGame()
 
     # OPTIONS MENU
     if (options):
+        # music
+        menuMusic.stop()
+        optionsMusic.play()
+
+        # objects
         BlitOptionsObjects()
         
+        # buttons - toggles
         if (showGenCountsBTN.draw(screen, "genCountBTN")):
             showGenCounts = not showGenCounts
             # update clicked button imgs
@@ -360,6 +388,7 @@ while True:
             if (not showPopulation):
                 showPopCountsBTN.update_img(popOffImg)
 
+        # buttons - click
         playing = startBTN2.draw(screen, "startBTN")
     
     # ABOUT MENU
