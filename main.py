@@ -145,9 +145,19 @@ pixelsList = []
 baseImg = pygame.image.load('img/pixel/1.png')
 redImg = pygame.image.load('img/pixel/red.png')
 
-oldAgeThresh = 60  # pixels die after this many gens
+oldAgeThresh = 80  # pixels die after this many gens
 
 populationCount = 0
+
+# probability ( (1/num) + 1 ) that gen counters of pixels
+# decrease 
+deAgeProbability = 100
+
+# increase
+preAgeProbability = 100
+
+# maximum modifier to gen counter
+maxGenMod = 80
 
 ###########
 # Classes #
@@ -174,8 +184,11 @@ class Pixel():
 
         self.genCount += 1
 
-        if (random.randint(0, 150) == 0):  # 1 in 151 chance
-            self.genCount -= random.randint(0, 5)  # to lower gen count
+        if (random.randint(0, preAgeProbability) == 0):  # 1 in preAgeProb chance
+            self.genCount -= random.randint(0, maxGenMod)  # to lower gen count
+
+        if (random.randint(0, deAgeProbability) == 0):
+            self.genCount += random.randint(0, maxGenMod)
 
         # update display number to match gen
         if (showGenCounts):
