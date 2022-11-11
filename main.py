@@ -10,10 +10,12 @@ pygame.display.set_caption("Life In Turmoil")
 # colors
 BLACK = (0, 0, 0)
 RED = (150, 0, 0)
+GREENBLUE = (0, 200, 100)
 
 # fonts
 athena1 = pygame.font.Font("AthenaRustic.ttf", 32)
-genDisplayFont = pygame.font.Font("AthenaRustic.ttf", 18)
+athena2 = pygame.font.Font("AthenaRustic.ttf", 18)
+
 
 ###############
 # SCREEN SIZE #
@@ -29,6 +31,7 @@ sFactor = 17
 
 realScreenWidth = screen_width * (sFactor + 1)
 realScreenHeight = screen_height * (sFactor + 2)
+
 
 #############
 # MAIN MENU #
@@ -62,6 +65,7 @@ optionsBTN = button.Button(titleX // 2 + sFactor // 3, titleY * 2.3,
 # decorations - images
 decorIMG1 = pygame.image.load("img/decor/decor1.png")
 
+
 ################
 # OPTIONS MENU #
 ################
@@ -69,7 +73,7 @@ decorIMG1 = pygame.image.load("img/decor/decor1.png")
 options = False
 
 showGenCounts = False
-showPopulation = False
+showPopulation = True
 
 # text
 optionsText = athena1.render("OPTIONS OPTIONS OPTIONS OPTIONS", True, RED)
@@ -85,19 +89,35 @@ popOnImg = pygame.image.load("img/button/popCountOn.png")
 popOffImg = pygame.image.load("img/button/popCountOff.png")
 
 # buttons - definitions
-startBTN2 = button.Button(titleX * 1.4, titleY * 3.4, startButtonImg,
-                         buttonScale*0.6)
+startBTN2 = button.Button(titleX * 1.4, titleY * 3.4, startButtonImg, buttonScale*0.6)
 showGenCountsBTN = button.Button(titleX // 3, titleY *0.8, genOffImg, buttonScale * 8)
 showPopCountsBTN = button.Button(titleX // 3, titleY * 2.5, popOffImg, buttonScale * 8)
+
+
+##############
+# ABOUT MENU #
+##############
+
+# are we in this menu?
+about = False
+
+# buttons - images
+aboutIMG = pygame.image.load("img/button/aboutBTN.png")
+
+# buttons - definitions
+aboutBTN = button.Button(titleX * 0.73, titleY * 2.69, aboutIMG, buttonScale)
+
 
 ########
 # GAME #
 ########
 
+# text objects
 popText = athena1.render("Population Count:", True, BLACK)
 
 popTextRect = popText.get_rect()
-popTextRect.center = (titleX, titleY * 4)
+popTextRect.center = (titleX * 0.9, titleY * 3.8)
+
 
 ##########
 # PIXELS #
@@ -140,7 +160,7 @@ class Pixel():
         self.iY = iY  # y index
 
         self.genCount = 0
-        self.genDisplay = genDisplayFont.render(str(self.genCount), True, RED)
+        self.genDisplay = athena2.render(str(self.genCount), True, RED)
       
         self.alive = random.randint(0, 1)  # random seed for each pixel
         self.diseased = False
@@ -159,7 +179,7 @@ class Pixel():
 
         # update display number to match gen
         if (showGenCounts):
-          self.genDisplay = genDisplayFont.render(str(self.genCount), True, RED)
+          self.genDisplay = athena2.render(str(self.genCount), True, GREENBLUE)
 
     def CalcMoveAmounts(self, x, y):
         self.dX = random.choice(stepListX)
@@ -182,7 +202,6 @@ def Set_Pixel_Array():
 
 def Pixels():
     time.sleep(discreteStep)
-    populationCount = 0
 
     # iterate through matrix
     for y in range(screen_height):
@@ -216,9 +235,6 @@ def Pixels():
             if (x * screenStepX + localDX <= 0):
                 localDX = 0
 
-            # IF SHOWING POP COUNT #
-            if (pixelsList[y][x].alive):
-                populationCount += 1
 
             ########
             # BLIT #
@@ -226,12 +242,24 @@ def Pixels():
 
             # show them on screen
             if pixelsList[y][x].alive == 1:
+                # pixels
                 screen.blit(baseImg,
                             (((x * screenStepX) + offsetX) + localDX,
                              ((y * screenStepY) + offsetY) + localDY))
+                
+                # generation counters per pixel
                 if (showGenCounts):
                   screen.blit(pixelsList[y][x].genDisplay, (((x * screenStepX) + offsetX) + localDX,
                              ((y * screenStepY) + offsetY) + localDY + textOffset))
+
+def CalcPopulation():
+    popCount = 0
+    for y in range(screen_height):
+        for x in range(screen_width):
+            if pixelsList[y][x].alive == 1:
+                popCount += 1
+
+    return popCount
 
 ##################
 # MENU FUNCTIONS #
@@ -264,9 +292,11 @@ def PlayGame():
     if (showPopulation):
         screen.blit(popText, popTextRect)
 
+        populationCount = CalcPopulation()
+
         popNumText = athena1.render(str(populationCount), True, RED)
         popNumTextRect = popNumText.get_rect()
-        popNumTextRect.center = (titleX * 1.1, titleY * 3.1)
+        popNumTextRect.center = (titleX * 1.75, titleY * 3.8)
 
         screen.blit(popNumText, popNumTextRect)
 
@@ -280,17 +310,24 @@ rotatedDecorIMG1 = pygame.transform.rotate(decorIMG1, 210)
 pixelsList = Set_Pixel_Array()
 
 while True:
+    # MAIN MENU
     if (playing == False):
       if (options == False):
         # main menu stuff + options
         BlitMenuObjects()
         playing = startBTN.draw(screen, "startBTN")
         options = optionsBTN.draw(screen, "optionsBTN")
+        about = aboutBTN.draw(screen, "aboutBTN")
 
+    # GAME
     if (playing):
+        # make sure we don't slip into 
+        # other menus (options...)
         options = False
+        about = False
         PlayGame()
 
+    # OPTIONS MENU
     if (options):
         BlitOptionsObjects()
         
@@ -311,6 +348,10 @@ while True:
                 showPopCountsBTN.update_img(popOffImg)
 
         playing = startBTN2.draw(screen, "startBTN")
+    
+    # ABOUT MENU
+    if (about):
+        pass
       
         
 
