@@ -157,7 +157,7 @@ pixelsList = []
 baseImg = pygame.image.load('img/pixel/1.png')
 redImg = pygame.image.load('img/pixel/red.png')
 
-oldAgeThresh = 80  # pixels die after this many gens
+oldAgeThresh = 10  # pixels die after this many gens
 
 populationCount = 0
 
@@ -171,6 +171,10 @@ preAgeProbability = 100
 # maximum modifier to gen counter
 maxGenMod = 80
 
+# collision
+colThreshX = 5
+colThreshY = 5
+
 ###########
 # Classes #
 ###########
@@ -181,12 +185,18 @@ class Pixel():
         self.iX = iX  # x index (in list)
         self.iY = iY  # y index
 
+
         self.genCount = 0
         self.genDisplay = athena2.render(str(self.genCount), True, RED)
       
         self.alive = random.randint(0, 1)  # random seed for each pixel
         self.diseased = False
 
+        # movement - coordinates
+        self.x = 0
+        self.y = 0
+
+        # movement - deltas
         self.dY = 0
         self.dX = 0
 
@@ -235,12 +245,15 @@ def Pixels():
             # update each pixel instance
             pixelsList[y][x].Update()
 
+            # print coordinate values for each pixel
+            print("(" + str(pixelsList[y][x].x) + ", " + str(pixelsList[y][x].y)  + ") " + str(x) + ", " + str(y))
+
             # calculate the movement of each pixel
             localDX, localDY = pixelsList[y][x].CalcMoveAmounts(x, y)
 
-            #####
+            
             ############# Y #############
-            #####
+            
             # if we are moving off screen (down)
             if (y * screenStepY + localDY >= screen_height * sFactor):
                 localDY = 0
@@ -249,9 +262,9 @@ def Pixels():
             if (y * screenStepY + localDY <= 0):
                 localDY = 0
 
-            #####
+            
             ############# X #############
-            #####
+            
             # if we are moving off screen (right)
             if (y * screenStepX + localDX >= screen_width * sFactor):
                 localDX = 0
@@ -259,6 +272,16 @@ def Pixels():
             # if we are moving off screen (left)
             if (x * screenStepX + localDX <= 0):
                 localDX = 0
+
+            #############
+            # COLLISION #
+            #############
+
+            # check the pixellist for every index that 
+            # collides with this one pixel's rect.
+            # this returns all of the indices (in the 
+            # pixels list) of pixels that touch this one.
+            tempColList = pixelsList[y][x].rect.collidelistall(pixelsList)
 
 
             ########
@@ -271,7 +294,11 @@ def Pixels():
                 screen.blit(baseImg,
                             (((x * screenStepX) + offsetX) + localDX,
                              ((y * screenStepY) + offsetY) + localDY))
-                
+
+                # update coordinate values for each pixel
+                pixelsList[y][x].x = ((x * screenStepX) + offsetX) + localDX
+                pixelsList[y][x].y = ((y * screenStepY) + offsetY) + localDY
+
                 # generation counters per pixel
                 if (showGenCounts):
                   screen.blit(pixelsList[y][x].genDisplay, (((x * screenStepX) + offsetX) + localDX,
