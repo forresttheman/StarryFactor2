@@ -157,8 +157,7 @@ pixelsList = []
 baseImg = pygame.image.load('img/pixel/1.png')
 redImg = pygame.image.load('img/pixel/red.png')
 
-oldAgeThresh = 10  # pixels die after this many gens
-
+# keep track of population!
 populationCount = 0
 
 # probability ( (1/num) + 1 ) that gen counters of pixels
@@ -168,20 +167,18 @@ deAgeProbability = 100
 # increase
 preAgeProbability = 100
 
-# maximum modifier to gen counter
-maxGenMod = 80
+# pixels die after this many gens
+oldAgeThresh = 10
 
-# collision
-colThreshX = 5
-colThreshY = 5
+# maximum modifier to gen counter
+maxGenMod = oldAgeThresh // 2
 
 ###########
 # Classes #
 ###########
 
 class Pixel():
-
-    def __init__(self, iX, iY):
+    def __init__(self, iX, iY, img):
         self.iX = iX  # x index (in list)
         self.iY = iY  # y index
 
@@ -200,10 +197,20 @@ class Pixel():
         self.dY = 0
         self.dX = 0
 
+        # collision
+        self.img = img
+        self.rect = self.img.get_rect()
+
     def Update(self):
+        # move this pixel's rectangle
+        self.dX, self.dY = self.CalcMoveAmounts()
+        self.rect.move(self.dX, self.dY)
+
+        # are we dying of old age?
         if (self.genCount >= oldAgeThresh):
             self.alive = 0
 
+        # manipulate generation counters
         self.genCount += 1
 
         if (random.randint(0, preAgeProbability) == 0):  # 1 in preAgeProb chance
@@ -216,7 +223,7 @@ class Pixel():
         if (showGenCounts):
           self.genDisplay = athena2.render(str(self.genCount), True, GREENBLUE)
 
-    def CalcMoveAmounts(self, x, y):
+    def CalcMoveAmounts(self):
         self.dX = random.choice(stepListX)
         self.dY = random.choice(stepListY)
 
@@ -229,9 +236,8 @@ class Pixel():
 
 def Set_Pixel_Array():
     # list that pixels are stored in
-    pixelsList = [[Pixel(x, y) for x in range(screen_width)]
+    pixelsList = [[Pixel(x, y, baseImg) for x in range(screen_width)]
                   for y in range(screen_height)]
-
     return pixelsList
 
 
@@ -246,10 +252,10 @@ def Pixels():
             pixelsList[y][x].Update()
 
             # print coordinate values for each pixel
-            print("(" + str(pixelsList[y][x].x) + ", " + str(pixelsList[y][x].y)  + ") " + str(x) + ", " + str(y))
+            # print("(" + str(pixelsList[y][x].x) + ", " + str(pixelsList[y][x].y)  + ") " + str(x) + ", " + str(y))
 
             # calculate the movement of each pixel
-            localDX, localDY = pixelsList[y][x].CalcMoveAmounts(x, y)
+            localDX, localDY = pixelsList[y][x].CalcMoveAmounts()
 
             
             ############# Y #############
@@ -281,7 +287,7 @@ def Pixels():
             # collides with this one pixel's rect.
             # this returns all of the indices (in the 
             # pixels list) of pixels that touch this one.
-            tempColList = pixelsList[y][x].rect.collidelistall(pixelsList)
+            # tempColList = pixelsList[y][x].rect.collidelistall(pixelsRectList)
 
 
             ########
@@ -291,13 +297,13 @@ def Pixels():
             # show them on screen
             if pixelsList[y][x].alive == 1:
                 # pixels
-                screen.blit(baseImg,
+                screen.blit(pixelsList[y][x].img,
                             (((x * screenStepX) + offsetX) + localDX,
                              ((y * screenStepY) + offsetY) + localDY))
 
                 # update coordinate values for each pixel
-                pixelsList[y][x].x = ((x * screenStepX) + offsetX) + localDX
-                pixelsList[y][x].y = ((y * screenStepY) + offsetY) + localDY
+                # pixelsList[y][x].x = ((x * screenStepX) + offsetX) + localDX
+                # pixelsList[y][x].y = ((y * screenStepY) + offsetY) + localDY
 
                 # generation counters per pixel
                 if (showGenCounts):
@@ -312,6 +318,7 @@ def CalcPopulation():
                 popCount += 1
 
     return popCount
+
 
 ##################
 # MENU FUNCTIONS #
@@ -329,7 +336,7 @@ def BlitMenuObjects():
 
 
 def BlitOptionsObjects():
-    screen.fill((180, 100, 15))
+    screen.fill((120, 176, 255))
 
     # text objects
     screen.blit(optionsText, optionsTextRect)
