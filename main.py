@@ -10,8 +10,6 @@ pygame.init()
 pygame.display.set_caption("Life In Turmoil")
 
 # music - audio files
-
-optionsMusic = mixer.music.load("audio/OptionsMusic.mp3")
 gameMusic = mixer.music.load("audio/GameMusic.mp3")
 
 # audio settings (adjust in options as well)
@@ -20,7 +18,7 @@ mixer.music.set_volume(0.2)
 # colors
 BLACK = (0, 0, 0)
 RED = (150, 0, 0)
-GREENBLUE = (0, 200, 100)
+TEAL = (0, 100, 100)
 
 # fonts
 athena1 = pygame.font.Font("AthenaRustic.ttf", 32)
@@ -80,8 +78,10 @@ decorIMG1 = pygame.image.load("img/decor/decor1.png")
 # OPTIONS MENU #
 ################
 
+# are we in this menu
 options = False
 
+# settings
 showGenCounts = False
 showPopulation = True
 
@@ -99,7 +99,7 @@ popOnImg = pygame.image.load("img/button/popCountOn.png")
 popOffImg = pygame.image.load("img/button/popCountOff.png")
 
 # buttons - definitions
-startBTN2 = button.Button(titleX * 1.4, titleY * 3.4, startButtonImg, buttonScale*0.6)
+startBTN2 = button.Button(titleX * 1.4, titleY * 3.4, startButtonImg, buttonScale * 0.6)
 showGenCountsBTN = button.Button(titleX // 3, titleY *0.8, genOffImg, buttonScale * 8)
 showPopCountsBTN = button.Button(titleX // 3, titleY * 2.5, popOffImg, buttonScale * 8)
 
@@ -189,10 +189,6 @@ class Pixel():
         self.alive = random.randint(0, 1)  # random seed for each pixel
         self.diseased = False
 
-        # movement - coordinates
-        self.x = 0
-        self.y = 0
-
         # movement - deltas
         self.dY = 0
         self.dX = 0
@@ -221,7 +217,7 @@ class Pixel():
 
         # update display number to match gen
         if (showGenCounts):
-          self.genDisplay = athena2.render(str(self.genCount), True, GREENBLUE)
+          self.genDisplay = athena2.render(str(self.genCount), True, TEAL)
 
     def CalcMoveAmounts(self):
         self.dX = random.choice(stepListX)
@@ -251,9 +247,6 @@ def Pixels():
             # update each pixel instance
             pixelsList[y][x].Update()
 
-            # print coordinate values for each pixel
-            # print("(" + str(pixelsList[y][x].x) + ", " + str(pixelsList[y][x].y)  + ") " + str(x) + ", " + str(y))
-
             # calculate the movement of each pixel
             localDX, localDY = pixelsList[y][x].CalcMoveAmounts()
 
@@ -279,16 +272,6 @@ def Pixels():
             if (x * screenStepX + localDX <= 0):
                 localDX = 0
 
-            #############
-            # COLLISION #
-            #############
-
-            # check the pixellist for every index that 
-            # collides with this one pixel's rect.
-            # this returns all of the indices (in the 
-            # pixels list) of pixels that touch this one.
-            # tempColList = pixelsList[y][x].rect.collidelistall(pixelsRectList)
-
 
             ########
             # BLIT #
@@ -300,10 +283,6 @@ def Pixels():
                 screen.blit(pixelsList[y][x].img,
                             (((x * screenStepX) + offsetX) + localDX,
                              ((y * screenStepY) + offsetY) + localDY))
-
-                # update coordinate values for each pixel
-                # pixelsList[y][x].x = ((x * screenStepX) + offsetX) + localDX
-                # pixelsList[y][x].y = ((y * screenStepY) + offsetY) + localDY
 
                 # generation counters per pixel
                 if (showGenCounts):
@@ -333,7 +312,6 @@ def BlitMenuObjects():
 
     # text objects
     screen.blit(menuText, menuTextRect)
-
 
 def BlitOptionsObjects():
     screen.fill((120, 176, 255))
@@ -368,6 +346,7 @@ def PlayGame():
 
         screen.blit(popNumText, popNumTextRect)
 
+
 ########
 # LOOP #
 ########
@@ -381,8 +360,9 @@ pixelsList = Set_Pixel_Array()
 mixer.music.load("audio/MenuMusic.mp3")
 mixer.music.play(-1, 0, 150)
 
+# forever loop
 while True:
-    # MAIN MENU
+    # MAIN MENU #
     if (playing == False):
       if (options == False):
             # main menu stuff
@@ -393,7 +373,7 @@ while True:
             options = optionsBTN.draw(screen, "optionsBTN")
             about = aboutBTN.draw(screen, "aboutBTN")
 
-    # GAME
+    # GAME #
     if (playing):
         # make sure we don't slip into 
         # other menus (options...)
@@ -402,7 +382,7 @@ while True:
 
         PlayGame()
 
-    # OPTIONS MENU
+    # OPTIONS MENU #
     if (options):
         # objects
         BlitOptionsObjects()
@@ -427,11 +407,10 @@ while True:
         # buttons - click
         playing = startBTN2.draw(screen, "startBTN")
     
-    # ABOUT MENU
+    # ABOUT MENU #
     if (about):
         pass
       
-
     # closing the window?
     for event in pygame.event.get():
         if event.type == QUIT:
