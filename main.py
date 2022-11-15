@@ -9,6 +9,13 @@ mixer.init()
 pygame.init()
 pygame.display.set_caption("Life In Turmoil")
 
+# time - animations
+FRAME_RATE = 60
+clock = pygame.time.Clock()
+
+current_time = 0
+anim_start_time = 0
+
 # music - audio files
 gameMusic = mixer.music.load("audio/GameMusic.mp3")
 
@@ -299,6 +306,55 @@ def CalcPopulation():
     return popCount
 
 
+######################
+# ANIMATIONS - MENUS #
+######################
+
+startPosX = titleX // 2
+startPosY = titleY // 2
+
+# delay between loops (milliseconds)
+animDelayMilli = 1000
+
+# how far and how many times the pixel moves
+moveLoops = 50
+move_increment = 5
+
+animPlaying = False
+
+def AnimateMenuPixel():
+    global animPlaying
+    global anim_start_time
+
+    
+    if (animPlaying == False):
+        print("playing anim 1")
+        # we are now playing the anim!
+        animPlaying = True
+
+        # update start coords
+        x = startPosX
+        y = startPosY
+        
+        # wait (no supersonic pixels here)
+        anim_start_time = pygame.time.get_ticks()
+
+        print(str(anim_start_time) + " ST")
+        print(str(current_time) + " Current Time, milliseconds")
+
+        # if we have waited long enough, play anim!
+        for i in range(moveLoops):
+            if (current_time - anim_start_time > animDelayMilli):
+                # debug
+                print(i)
+
+                # move pixel
+                x += move_increment
+                y += move_increment
+
+                screen.blit(baseImg, (x, y))
+
+
 ##################
 # MENU FUNCTIONS #
 ##################
@@ -312,6 +368,11 @@ def BlitMenuObjects():
 
     # text objects
     screen.blit(menuText, menuTextRect)
+
+    # animations
+    if (not animPlaying):
+        AnimateMenuPixel()
+
 
 def BlitOptionsObjects():
     screen.fill((120, 176, 255))
@@ -368,6 +429,9 @@ while True:
             # main menu stuff
             BlitMenuObjects()
 
+            # update time variables
+            current_time = pygame.time.get_ticks()
+
             # buttons
             playing = startBTN.draw(screen, "startBTN")
             options = optionsBTN.draw(screen, "optionsBTN")
@@ -417,4 +481,6 @@ while True:
             pygame.quit()
             sys.exit()
 
+    # update display and clock
+    clock.tick(FRAME_RATE)
     pygame.display.update()
