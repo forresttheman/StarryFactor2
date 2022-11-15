@@ -1,5 +1,6 @@
 import pygame, sys
 from pygame.locals import QUIT
+import asyncio
 import time
 import random
 import button
@@ -9,12 +10,9 @@ mixer.init()
 pygame.init()
 pygame.display.set_caption("Life In Turmoil")
 
-# time - animations
+# time 
 FRAME_RATE = 60
 clock = pygame.time.Clock()
-
-current_time = 0
-anim_start_time = 0
 
 # music - audio files
 gameMusic = mixer.music.load("audio/GameMusic.mp3")
@@ -314,7 +312,7 @@ startPosX = titleX // 2
 startPosY = titleY // 2
 
 # delay between loops (milliseconds)
-animDelayMilli = 1000
+animDelay = 1
 
 # how far and how many times the pixel moves
 moveLoops = 50
@@ -322,38 +320,38 @@ move_increment = 5
 
 animPlaying = False
 
-def AnimateMenuPixel():
+async def AnimateMenuPixel():
     global animPlaying
     global anim_start_time
 
-    
-    if (animPlaying == False):
-        print("playing anim 1")
-        # we are now playing the anim!
-        animPlaying = True
+    # set vars (avoid error crash)
+    localY = 0
+    localX = 0
 
-        # update start coords
-        x = startPosX
-        y = startPosY
-        
-        # wait (no supersonic pixels here)
+    # update start coords and start time
+    if (not animPlaying):
         anim_start_time = pygame.time.get_ticks()
 
-        print(str(anim_start_time) + " ST")
-        print(str(current_time) + " Current Time, milliseconds")
+        localX = startPosX
+        localY = startPosY
 
-        # if we have waited long enough, play anim!
+        animPlaying = True
+
+    if (animPlaying):
         for i in range(moveLoops):
-            if (current_time - anim_start_time > animDelayMilli):
-                # debug
-                print(i)
+            # wait
+            await asyncio.sleep(animDelay)
 
-                # move pixel
-                x += move_increment
-                y += move_increment
+            # move pixel
+            localX += move_increment
+            localY += move_increment
 
-                screen.blit(baseImg, (x, y))
+            screen.blit(baseImg, (localX, localY))
 
+async def PlayAnimsTask():
+    task = asyncio.create_task(AnimateMenuPixel())
+
+    await task
 
 ##################
 # MENU FUNCTIONS #
@@ -370,9 +368,7 @@ def BlitMenuObjects():
     screen.blit(menuText, menuTextRect)
 
     # animations
-    if (not animPlaying):
-        AnimateMenuPixel()
-
+    asyncio.run(PlayAnimsTask())
 
 def BlitOptionsObjects():
     screen.fill((120, 176, 255))
@@ -428,9 +424,6 @@ while True:
       if (options == False):
             # main menu stuff
             BlitMenuObjects()
-
-            # update time variables
-            current_time = pygame.time.get_ticks()
 
             # buttons
             playing = startBTN.draw(screen, "startBTN")
