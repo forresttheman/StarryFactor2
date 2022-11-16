@@ -17,9 +17,6 @@ clock = pygame.time.Clock()
 # music - audio files
 gameMusic = mixer.music.load("audio/GameMusic.mp3")
 
-# audio settings (adjust in options as well)
-mixer.music.set_volume(0.2)
-
 # colors
 BLACK = (0, 0, 0)
 RED = (150, 0, 0)
@@ -94,7 +91,7 @@ showPopulation = True
 optionsText = athena1.render("OPTIONS OPTIONS OPTIONS OPTIONS", True, RED)
 
 optionsTextRect = optionsText.get_rect()
-optionsTextRect.center = (titleX, titleY * 2)
+optionsTextRect.center = (titleX, titleY * 0.5)
 
 # buttons - images
 genOnImg = pygame.image.load("img/button/genCountOn.png")
@@ -103,10 +100,33 @@ genOffImg = pygame.image.load("img/button/genCountOff.png")
 popOnImg = pygame.image.load("img/button/popCountOn.png")
 popOffImg = pygame.image.load("img/button/popCountOff.png")
 
+# volume button stuff
+audioHighImg = pygame.image.load("img/audio/audioFull.png")
+audioMedImg = pygame.image.load("img/audio/audioMed.png")
+
+audioLowImg = pygame.image.load("img/audio/audioLow.png")
+audioOffImg = pygame.image.load("img/audio/audioOff.png")
+
+
 # buttons - definitions
 startBTN2 = button.Button(titleX * 1.4, titleY * 3.4, startButtonImg, buttonScale * 0.6)
+
 showGenCountsBTN = button.Button(titleX // 3, titleY *0.8, genOffImg, buttonScale * 8)
 showPopCountsBTN = button.Button(titleX // 3, titleY * 2.5, popOffImg, buttonScale * 8)
+
+volumeBTN = button.Button(titleX // 10, titleY * 3.3, audioHighImg, buttonScale * 0.5)
+
+
+# audio settings (adjust in options)
+volumeValueList = [0.2, 0.15, 0.1, 0] # highest to lowest
+volumeImgList = [audioHighImg, audioMedImg, audioLowImg, audioOffImg]
+
+# set default volume(highest)
+mixer.music.set_volume(volumeValueList[0])
+
+# how many times we have pressed button
+# start at 0 (-1 + 1 = 0)
+volumeBTN_counter = 0
 
 
 ##############
@@ -368,7 +388,7 @@ def BlitMenuObjects():
     screen.blit(menuText, menuTextRect)
 
     # animations
-    asyncio.run(PlayAnimsTask())
+    # asyncio.run(PlayAnimsTask())
 
 def BlitOptionsObjects():
     screen.fill((120, 176, 255))
@@ -432,8 +452,7 @@ while True:
 
     # GAME #
     if (playing):
-        # make sure we don't slip into 
-        # other menus (options...)
+        # make sure we don't slip into other menus (options...)
         options = False
         about = False
 
@@ -463,6 +482,19 @@ while True:
 
         # buttons - click
         playing = startBTN2.draw(screen, "startBTN")
+
+        # buttons - volume
+        changeVolume = volumeBTN.draw(screen, "volumeBTN")
+
+        if (changeVolume):
+            volumeBTN_counter += 1
+
+            if (volumeBTN_counter < len(volumeValueList)):
+                volumeBTN.update_img(volumeImgList[volumeBTN_counter])
+            else:
+                volumeBTN_counter = -1
+            
+            mixer.music.set_volume(volumeValueList[volumeBTN_counter])
     
     # ABOUT MENU #
     if (about):
