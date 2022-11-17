@@ -112,21 +112,22 @@ audioOffImg = pygame.image.load("img/audio/audioOff.png")
 startBTN2 = button.Button(titleX * 1.4, titleY * 3.4, startButtonImg, buttonScale * 0.6)
 
 showGenCountsBTN = button.Button(titleX // 3, titleY *0.8, genOffImg, buttonScale * 8)
-showPopCountsBTN = button.Button(titleX // 3, titleY * 2.5, popOffImg, buttonScale * 8)
+showPopCountsBTN = button.Button(titleX // 3, titleY * 2.7, popOffImg, buttonScale * 8)
 
-volumeBTN = button.Button(titleX // 10, titleY * 3.3, audioHighImg, buttonScale * 0.5)
+# volume btn
+volumeBTN = button.Button(titleX * 0.22, titleY * 1.5, audioHighImg, buttonScale * 1.2)
 
 
 # audio settings (adjust in options)
-volumeValueList = [0.2, 0.15, 0.1, 0] # highest to lowest
-volumeImgList = [audioHighImg, audioMedImg, audioLowImg, audioOffImg]
+volumeValueList = [0.2, 0.15, 0.1, 0, 0.1, 0.15, 0.2] # highest to lowest to highest
+volumeImgList = [audioHighImg, audioMedImg, audioLowImg, audioOffImg, audioLowImg, audioMedImg, audioHighImg]
 
 # set default volume(highest)
 mixer.music.set_volume(volumeValueList[0])
 
 # how many times we have pressed button
 # start at 0 (-1 + 1 = 0)
-volumeBTN_counter = 0
+volumeBTN_counter = -1
 
 
 ##############
@@ -492,7 +493,7 @@ while True:
             if (volumeBTN_counter < len(volumeValueList)):
                 volumeBTN.update_img(volumeImgList[volumeBTN_counter])
             else:
-                volumeBTN_counter = -1
+                volumeBTN_counter = 0
             
             mixer.music.set_volume(volumeValueList[volumeBTN_counter])
     
