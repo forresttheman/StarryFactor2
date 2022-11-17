@@ -1,6 +1,5 @@
 import pygame, sys
 from pygame.locals import QUIT
-import asyncio
 import time
 import random
 import button
@@ -323,56 +322,6 @@ def CalcPopulation():
                 popCount += 1
 
     return popCount
-
-
-######################
-# ANIMATIONS - MENUS #
-######################
-
-startPosX = titleX // 2
-startPosY = titleY // 2
-
-# delay between loops (milliseconds)
-animDelay = 1
-
-# how far and how many times the pixel moves
-moveLoops = 50
-move_increment = 5
-
-animPlaying = False
-
-async def AnimateMenuPixel():
-    global animPlaying
-    global anim_start_time
-
-    # set vars (avoid error crash)
-    localY = 0
-    localX = 0
-
-    # update start coords and start time
-    if (not animPlaying):
-        anim_start_time = pygame.time.get_ticks()
-
-        localX = startPosX
-        localY = startPosY
-
-        animPlaying = True
-
-    if (animPlaying):
-        for i in range(moveLoops):
-            # wait
-            await asyncio.sleep(animDelay)
-
-            # move pixel
-            localX += move_increment
-            localY += move_increment
-
-            screen.blit(baseImg, (localX, localY))
-
-async def PlayAnimsTask():
-    task = asyncio.create_task(AnimateMenuPixel())
-
-    await task
 
 ##################
 # MENU FUNCTIONS #
